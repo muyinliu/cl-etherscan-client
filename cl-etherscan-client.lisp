@@ -252,7 +252,7 @@ Note : This API endpoint returns a maximum of 10000 records only."
                                           (start-block 0)
                                           (end-block 99999999)
                                           (page 1)
-                                          (offset 0)
+                                          (offset nil)
                                           (sort "asc"))
   "Return NIL if there is NO transaction of the address,
 or return jsown in format if transactions exists:
@@ -272,27 +272,29 @@ or return jsown in format if transactions exists:
       \(\"isError\" . \"0\"\)
       \(\"errCode\" . \"\"\)\)
 Note: This API endpoint returns a maximum of 10000 records only.
-Note: offset 0 means no paging."
+Note: offset=0 or without offset means no paging."
   (assert (not (and (null contract-address)
                     (null address))))
   (assert (integerp start-block))
   (assert (integerp end-block))
   (assert (integerp page))
-  (assert (integerp offset))
+  (assert (or (null offset) (integerp offset)))
   (assert (member sort '("asc" "desc")
                   :test #'equal))
   (let ((response (request etherscan-client
                            "account"
                            "tokentx"
-                           :more-parameters (list (cons "contractaddress" contract-address)
-                                                  (cons "address" address)
-                                                  (cons "startblock"
-                                                        (write-to-string start-block))
-                                                  (cons "endblock"
-                                                        (write-to-string end-block))
-                                                  (cons "page" (write-to-string page))
-                                                  (cons "offset" (write-to-string offset))
-                                                  (cons "sort" sort)))))
+                           :more-parameters (append
+                                             (list (cons "contractaddress" contract-address)
+                                                   (cons "address" address)
+                                                   (cons "startblock"
+                                                         (write-to-string start-block))
+                                                   (cons "endblock"
+                                                         (write-to-string end-block))
+                                                   (cons "page" (write-to-string page))
+                                                   (cons "sort" sort))
+                                             (when offset
+                                               (list (cons "offset" (write-to-string offset))))))))
     (values response)))
 
 (defmethod contract-get-source-code ((etherscan-client etherscan-client)

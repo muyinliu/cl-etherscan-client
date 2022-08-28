@@ -23,6 +23,7 @@
            #:account-balance-multi
            #:account-transaction-list
            #:account-transaction-list-internal
+           #:account-token-transfer-list
            #:contract-get-source-code
            #:gas-oracle
            #:last-price
