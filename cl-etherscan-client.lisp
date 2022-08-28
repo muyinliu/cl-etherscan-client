@@ -157,7 +157,7 @@ response body: ~S~%"
                                        (start-block 0)
                                        (end-block 99999999)
                                        (page 1)
-                                       (offset 0)
+                                       (offset nil)
                                        (sort "asc"))
   "Return NIL if there is NO transaction of the address,
 or return jsown in format if transactions exists:
@@ -184,31 +184,33 @@ Note : This API endpoint returns a maximum of 10000 records only."
   (assert (integerp start-block))
   (assert (integerp end-block))
   (assert (integerp page))
-  (assert (integerp offset))
+  (assert (or (null offset) (integerp offset)))
   (assert (member sort '("asc" "desc")
                   :test #'equal))
   (let ((response (request etherscan-client
                            "account"
                            "txlist"
-                           :more-parameters (list (cons "address" address)
-                                                  (cons "startblock"
-                                                        (write-to-string start-block))
-                                                  (cons "endblock"
-                                                        (write-to-string end-block))
-                                                  (cons "page" (write-to-string page))
-                                                  (cons "offset" (write-to-string offset))
-                                                  (cons "sort" sort)))))
+                           :more-parameters (append
+                                             (list (cons "address" address)
+                                                   (cons "startblock"
+                                                         (write-to-string start-block))
+                                                   (cons "endblock"
+                                                         (write-to-string end-block))
+                                                   (cons "page" (write-to-string page))
+                                                   (cons "sort" sort))
+                                             (when offset
+                                               (list (cons "offset" (write-to-string offset))))))))
     (values response)))
 
 (defmethod account-transaction-list-internal ((etherscan-client etherscan-client)
-                                              (address string)
                                               &key
+                                                (address nil)
                                                 (start-block 0)
                                                 (end-block 99999999)
                                                 (page 1)
                                                 (offset 0)
-                                                (sort "asc"))
-  "Return NIL if there is NO transaction of the address,
+                                                (sort nil))
+  "Return NIL if there is NO internaltransaction of the address,
 or return jsown in format if transactions exists:
    \(\(:OBJ
       \(\"blockNumber\" . \"9786439\"\)
@@ -230,20 +232,22 @@ Note : This API endpoint returns a maximum of 10000 records only."
   (assert (integerp end-block))
   (assert (integerp page))
   (assert (integerp offset))
-  (assert (member sort '("asc" "desc")
-                  :test #'equal))
-  (let ((response (request etherscan-client
-                           "account"
-                           "txlistinternal"
-                           :more-parameters (list (cons "address" address)
-                                                  (cons "startblock"
-                                                        (write-to-string start-block))
-                                                  (cons "endblock"
-                                                        (write-to-string end-block))
-                                                  (cons "page" (write-to-string page))
-                                                  (cons "offset" (write-to-string offset))
-                                                  (cons "sort" sort)))))
-    (values response)))
+  (assert (or (null sort)
+              (member sort '("asc" "desc")
+                      :test #'equal)))
+  (request etherscan-client
+           "account"
+           "txlistinternal"
+           :more-parameters (append (when address
+                                      (list (cons "address" address)))
+                                    (when sort
+                                      (list (cons "sort" sort)))
+                                    (list (cons "startblock"
+                                                (write-to-string start-block))
+                                          (cons "endblock"
+                                                (write-to-string end-block))
+                                          (cons "page" (write-to-string page))
+                                          (cons "offset" (write-to-string offset))))))
 
 (defmethod account-token-transfer-list ((etherscan-client etherscan-client)
                                         &key
