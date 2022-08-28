@@ -301,6 +301,33 @@ Note: offset=0 or without offset means no paging."
                                                (list (cons "offset" (write-to-string offset))))))))
     (values response)))
 
+(defmethod transaction-transaction-list-internal ((etherscan-client etherscan-client)
+                                                  (transaction-hash string))
+  "Return NIL if there is NO internal transaction of the transaction hash,
+or return jsown in format if transactions exists:
+   \(\(:OBJ
+      \(\"blockNumber\" . \"9786439\"\)
+      \(\"timeStamp\" . \"1628220184\"\)
+      \(\"hash\" . \"0xXXX\"\)
+      \(\"from\" . \"0xXXX\"\)
+      \(\"to\" . \"0xXXX\"\)
+      \(\"value\" . \"500000000000000000\"\)
+      \(\"contractAddress\" . \"\"\)
+      \(\"input\" . \"0x\"\)
+      \(\"type\" . \"call\"\)
+      \(\"gas\" . \"50000\"\)
+      \(\"gasUsed\" . \"21000\"\)
+      \(\"traceId\" . \"\"\)
+      \(\"isError\" . \"0\"\)
+      \(\"errCode\" . \"\"\)\)
+Note : This API endpoint returns a maximum of 10000 records only."
+  (let ((response (request etherscan-client
+                           "account"
+                           "txlistinternal"
+                           :more-parameters (list (cons "txhash" transaction-hash)
+                                                  (cons "page" "1")))))
+    (values response)))
+
 (defmethod contract-get-source-code ((etherscan-client etherscan-client)
                                      (address string))
   "Return NIL if contract source code NOT verified,

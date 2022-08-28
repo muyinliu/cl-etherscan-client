@@ -24,6 +24,7 @@
            #:account-transaction-list
            #:account-transaction-list-internal
            #:account-token-transfer-list
+           #:transaction-transaction-list-internal
            #:contract-get-source-code
            #:gas-oracle
            #:last-price
