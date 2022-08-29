@@ -49,10 +49,12 @@
 
 (defmethod print-object ((etherscan-client etherscan-client) stream)
   (print-unreadable-object (etherscan-client stream :type t :identity t)
-    (format stream ":scheme ~S :host ~S :port ~S"
+    (format stream ":scheme ~S :host ~S :port ~S :proxy ~S :debug-p ~S"
             (slot-value etherscan-client 'scheme)
             (slot-value etherscan-client 'host)
-            (slot-value etherscan-client 'port))))
+            (slot-value etherscan-client 'port)
+            (slot-value etherscan-client 'proxy)
+            (slot-value etherscan-client 'debug-p))))
 
 (defun make-etherscan-client (api-key
                               &key
