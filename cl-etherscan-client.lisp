@@ -30,7 +30,7 @@
     :initarg :native-currency
     :initform (error "parameter native-currency is required")
     :reader native-currency
-    :documentation "e.g. eth for Ethereum, bnb for BSC, ht for HECO")
+    :documentation "used in method last-price, e.g. eth for Ethereum, bnb for BSC, '' for HECO")
    (proxy
     :initarg :proxy
     :initform nil
