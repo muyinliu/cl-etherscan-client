@@ -383,9 +383,15 @@ or return jsown in format if contract source code verified:
     (values response)))
 
 (defmethod last-price-in-usd ((etherscan-client etherscan-client))
-  (wu-decimal:parse-decimal
-   (jsown:val (last-price etherscan-client) "ethusd")))
+  (let ((last-price (last-price etherscan-client)))
+    (wu-decimal:parse-decimal
+     (if (jsown:keyp last-price "ethusd")
+         (jsown:val last-price "ethusd")
+         (jsown:val last-price (format nil "~Ausd" (native-currency etherscan-client)))))))
 
 (defmethod last-price-in-btc ((etherscan-client etherscan-client))
-  (wu-decimal:parse-decimal
-   (jsown:val (last-price etherscan-client) "ethbtc")))
+  (let ((last-price (last-price etherscan-client)))
+    (wu-decimal:parse-decimal
+     (if (jsown:keyp last-price "ethbtc")
+         (jsown:val last-price "ethbtc")
+         (jsown:val last-price (format nil "~Abtc" (native-currency etherscan-client)))))))
