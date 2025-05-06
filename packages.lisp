@@ -5,13 +5,15 @@
   (:nicknames #:etherscan-client #:etherscan)
   #+:sbcl (:shadow :defconstant)
   #+:sb-package-locks (:lock t)
-  (:export #:+default-scheme+ ;; constant
-           #:+default-host+   ;; constant
-           #:+default-port+   ;; constant
-           #:etherscan-client ;; class
+  (:export #:+default-chain-id+ ;; constant
+           #:+default-scheme+   ;; constant
+           #:+default-host+     ;; constant
+           #:+default-port+     ;; constant
+           #:etherscan-client   ;; class
            #:make-etherscan-client
            #:api-key
            #:native-currency
+           #:chain-id
            #:scheme
            #:host
            #:port

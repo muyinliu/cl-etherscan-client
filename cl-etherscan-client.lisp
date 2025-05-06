@@ -1,32 +1,44 @@
 (in-package :cl-etherscan-client)
 
+(defconstant +default-chain-id+        1)
 (defconstant +default-scheme+          "https")
 (defconstant +default-host+            "api.etherscan.io")
 (defconstant +default-port+            443)
 (defconstant +default-native-currency+ "eth")
 
 (defclass etherscan-client ()
-  ((scheme
+  ((chain-id
+    :type (or integer )
+    :initarg :chain-id
+    :initform null
+    :reader chain-id
+    :documentation "Chain ID, more detail see https://docs.etherscan.io/etherscan-v2/getting-started/supported-chains")
+   (scheme
+    :type string
     :initarg :scheme
     :initform +default-scheme+
     :reader scheme
     :documentation "https or http")
    (host
+    :type string
     :initarg :host
     :initform +default-host+
     :reader host
     :documentation "API host, default: api.etherscan.io")
    (port
+    :type integer
     :initarg :port
     :initform +default-port+
     :reader port
     :documentation "API port, default: 443")
    (api-key
+    :type string
     :initarg :api-key
     :initform (error "parameter api-key is required")
     :reader api-key
     :documentation "Please register and fetch API key on page https://etherscan.io/myapikey")
    (native-currency
+    :type string
     :initarg :native-currency
     :initform (error "parameter native-currency is required")
     :reader native-currency
@@ -42,6 +54,7 @@
     :accessor proxy-basic-authorization
     :documentation "e.g. '\(\"username\" \"password\"\)")
    (debug-p
+    :type boolean
     :initarg :debug-p
     :initform nil
     :accessor debug-p
@@ -49,7 +62,8 @@
 
 (defmethod print-object ((etherscan-client etherscan-client) stream)
   (print-unreadable-object (etherscan-client stream :type t :identity t)
-    (format stream ":scheme ~S :host ~S :port ~S :proxy ~S :debug-p ~S"
+    (format stream ":chain-id ~S :scheme ~S :host ~S :port ~S :proxy ~S :debug-p ~S"
+            (slot-value etherscan-client 'chain-id)
             (slot-value etherscan-client 'scheme)
             (slot-value etherscan-client 'host)
             (slot-value etherscan-client 'port)
@@ -58,6 +72,7 @@
 
 (defun make-etherscan-client (api-key
                               &key
+                                (chain-id nil)
                                 (scheme +default-scheme+)
                                 (host +default-host+)
                                 (port +default-port+)
@@ -67,6 +82,7 @@
                                 (debug-p nil))
   (assert (stringp api-key))
   (make-instance 'etherscan-client
+                 :chain-id chain-id
                  :scheme scheme
                  :host host
                  :port port
@@ -88,14 +104,18 @@
        - Standard     user: 10 calls/second, up to  200,000 calls/day
        - Advanced     user: 20 calls/second, up to  500,000 calls/day
        - Professional user: 30 calls/second, up to 1000,000 calls/day"
-  (let ((url (format nil "~A://~A:~A/api"
-                     (scheme etherscan-client)
-                     (host etherscan-client)
-                     (port etherscan-client)))
-        (parameters (append (list (cons "module" module)
-                                  (cons "action" action)
-                                  (cons "apikey" (api-key etherscan-client)))
-                            more-parameters)))
+  (let* ((chain-id (chain-id etherscan-client))
+         (url (format nil "~A://~A:~A/~@[v2/~]api"
+                      (scheme etherscan-client)
+                      (host etherscan-client)
+                      (port etherscan-client)
+                      (not (null chain-id))))
+         (parameters (append (when chain-id
+                               (list (cons "chainid" (write-to-string chain-id))))
+                             (list (cons "module" module)
+                                   (cons "action" action)
+                                   (cons "apikey" (api-key etherscan-client)))
+                             more-parameters)))
     (multiple-value-bind (data status)
         (drakma:http-request url
                              :method method
