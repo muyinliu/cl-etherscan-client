@@ -29,7 +29,8 @@
            #:gas-oracle
            #:last-price
            #:last-price-in-usd
-           #:last-price-in-btc))
+           #:last-price-in-btc
+           #:total-supply))
 
 (in-package :cl-etherscan-client)
 

@@ -395,3 +395,12 @@ or return jsown in format if contract source code verified:
      (if (jsown:keyp last-price "ethbtc")
          (jsown:val last-price "ethbtc")
          (jsown:val last-price (format nil "~Abtc" (native-currency etherscan-client)))))))
+
+(defmethod total-supply ((etherscan-client etherscan-client))
+  "Return string"
+  (let ((response (request etherscan-client
+                           "stats"
+                           (format nil "~Asupply" (native-currency etherscan-client)))))
+    (when (and response
+               (stringp response))
+      (values response))))
